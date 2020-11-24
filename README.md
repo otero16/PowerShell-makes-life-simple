@@ -11,7 +11,7 @@ My code will never include
 
 2. Rights over my soul 
 
-3. Answers to you math problems
+3. Answers to your math problems
 
 4. The formula explaining how to turn led into gold
 
