@@ -26,7 +26,7 @@ Reading my code will give the obligation to:
 
 3. Test My code and if you find errors be so kind to comment that
 
-Well having all said lets get-coffee, oh my i need to a function for this command now...
+Well having all said lets get-coffee, oh my i need a function for this command now...
 
 See ya... :)
 
