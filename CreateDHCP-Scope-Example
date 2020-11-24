@@ -1,0 +1,35 @@
+# Create an IPv4 DHCP Server Scope
+
+$HashArgs = @{   
+		'Name' = 'CONTOSO-SCOPE1'
+		'StartRange' = '10.10.10.1';
+		'EndRange' = '10.10.10.254';
+		'SubnetMask' = '255.255.255.0';
+		'State' = 'Active';
+		} 
+
+Add-DhcpServerv4Scope @HashArgs
+
+# Set DHCP scope options
+
+$HashArgs = @{
+    'ScopeId' = '10.10.10.0';
+    'DnsServer' = '10.4.0.100, 10.4.0.102, 8.8.8.8';
+    'DnsDomain' = 'argn.com';
+    'Router' = '10.4.90.1';
+    'WinsServer' = '10.4.0.100, 10.4.0.102';
+}
+ 
+Set-DhcpServerv4OptionValue @HashArgs
+ 
+# Set WINS NBT Node type
+Set-DhcpServerv4OptionValue -ScopeId '10.10.10.0' -OptionId 046 -Value '0x8'
+
+# Set Boot Server Host Name
+Set-DhcpServerv4OptionValue -ScopeId '10.10.10.0' -OptionId 066 -Value '10.10.10.1'
+
+# Set Bootfile name
+Set-DhcpServerv4OptionValue -ScopeId '10.10.10.0' -OptionId 067 -Value 'filenamegoeshere'
+
+# Set Exclusion Range
+Add-Dhcpserverv4ExclusionRange -ScopeId '10.10.10.0' -StartRange 10.10.10.1 -EndRange 10.10.10.15
