@@ -1,0 +1,4 @@
+#List All DNS zones on one Server
+Get-DnsServerZone
+
+
