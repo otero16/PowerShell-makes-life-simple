@@ -1,4 +1,5 @@
-#List All DNS zones on one Server
+#List All DNS zones
 Get-DnsServerZone
 
-
+#List all Forwarding DNS zones 
+Get-DnsServerZone | Select ZoneName ( Where-Object {$_.IsReverseLookupZone -eq $false}
