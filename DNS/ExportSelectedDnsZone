@@ -1,0 +1,29 @@
+# Description:
+# Outputs all DNS records where a hostname resolves to an IP address
+# Output is  written to both console and csv file
+# Filename is determined from the zonename you have selected
+# This script will export the selected Forwarding DNS zones on the local server
+# The format of the csv will only include (Hostname,IP)
+
+
+$List = Get-DnsServerZone | Select ZoneName ( Where-Object {$_.IsReverseLookupZone -eq $false} )
+#List of DNS zones available for export
+write $List
+#Select the DNS zone you want to export to CSV
+$ZoneSelect = Read-Host -Prompt “Enter DNS Zone Name”
+$Results = Get-DnsServerResourceRecord -ZoneName $ZoneSelect
+$zoneRecords = @()
+foreach ($record in $Results) {
+$strHostname = $record.HostName
+$strIp = $record.Recorddata.IPv4Address.IPAddressToString
+if ($strIp) {
+$zoneRecord = $(“$strHostname,$strIp”)
+#Write to console the contents that will be exported in this way you can have visual control of the information that will be stored on the file
+Write-Host $zoneRecord
+$zoneRecords += $zoneRecord
+}
+}
+#Export and file creation
+if ($zoneRecords) {
+$zoneRecords | Sort-Object | Out-File “$strOutputPath\DnsZone-$ZoneSelect.csv”
+}
