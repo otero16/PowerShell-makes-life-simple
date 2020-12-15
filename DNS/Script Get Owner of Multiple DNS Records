@@ -1,0 +1,65 @@
+# Description:
+# This script is intended to be runned on Server Windows Server 2016 and up ****Not Tested****
+# This is intended to be excuted on DNS servers locally, and only present information with the goal of filtering the results in Excel
+# No changes are intended to dns records with this script
+# Before running this script please take a DNS server backup, stay home be safe do backups
+
+# Inspired by: https://gallery.technet.microsoft.com/scriptcenter/Get-Owner-of-Multiple-DNS-5d421631 WICH IS A REALLY GOOD ALTERNATIVE TO THIS
+
+# More descriptions:
+# Outputs all DNS records where a hostname resolves to an IP address if there are CNAMES or other records that do not resolve to one IP address then it will not be processed 
+# Output is  written to both console and csv file 
+# Filename is determined from the zonename you have selected
+# This script will export the selected Forward and Reverse DNS zones on the local server
+
+# change the location to the root of C drive to save the results on the same place everytime
+
+# Disclaimer
+ cls 
+     Write-Host "=============================Welcome =================================" 
+     Write-Host "                   "    
+     Write-Host "If you are reading this, please be aware that this script has not been tested." 
+     Write-Host "                 " 
+     Write-Warning "Use at your Own Risk." 
+     Write-Host "                   " 
+
+cd /
+
+# List DNS zones
+$List = Get-DnsServerZone 
+
+write "ZoneName`n" ; $List.ZoneName 
+
+$ZoneSelect = Read-Host -Prompt “`nEnter DNS Zone Name”
+
+# Read all the resulting records from the selected zone
+$Results = Get-DnsServerResourceRecord -ZoneName $ZoneSelect
+
+# Make this records a list
+$zoneRecords = @()
+
+# Select from the record infomration the name ip type and owner
+foreach ($record in $Results) {
+$strHostname = $record.HostName
+$strIp = $record.Recorddata.IPv4Address.IPAddressToString
+$getRecordType = $record.RecordType
+
+# You will only need to ensure that the part of the root CN=MicrosoftDNS,DC=DomainDnsZones,DC=itadmin,DC=com (My domain name is itadmins.com) is correct please do not change the parts with parametrized values
+# You can test the following two lines alone to be sure that they are reporting the expected information this is the most common part to have issues
+        $getACL = get-acl -Path "ActiveDirectory:://RootDSE/DC=$strHostname,DC=$ZoneSelect,CN=MicrosoftDNS,DC=DomainDnsZones,DC=itadmin,DC=com" 
+        $getOwner = $ACL.Owner
+
+# Check if the record is resolving to one IP address
+if ($strIp) {
+$zoneRecord = $(“$strHostname,$strIp,$getRecordType,$getOwner")
+Write-Host $zoneRecord
+
+# Append to list of records to be exported
+$zoneRecords += $zoneRecord
+}
+}
+
+# Export process if there are records resolving to ip addresses on the selected zone
+if ($zoneRecords) {
+$zoneRecords | Sort-Object | Out-File “DnsZone-$ZoneSelect.csv”
+}
