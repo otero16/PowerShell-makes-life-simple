@@ -1,0 +1,42 @@
+# This script will allow you to select one Dynamic record and make it one static record
+# It will only work for Forward lookup zones
+# It will verify if this is one A record type, and will only change A records
+# It will make no changes if the record is static and will notify this
+# Before running this script ensure that you take a backup of your DNS server, stay home be safe do backups.
+
+#list dns zones on local server
+$DNSForwardLookupZone = Get-DnsServerZone | Where-Object {$_.IsReverseLookupZone -eq $false}
+
+write $DNSForwardlookupZone
+
+$SelectedDNSZone = Read-host -Prompt "Please Write the name of the Selected DNS zone"
+
+$DNSName = Read-Host -Prompt "Please write the Hostname of the record you wand to make Static"
+
+$DNSRecord = Get-DnsServerResourceRecord -ZoneName $SelectedDNSZone -Name $DNSName 
+
+#Show the data of the selected record
+write $DNSRecord
+
+#verify if this is one A record
+if ($DNSRecord.RecordType -eq "A")
+      {
+        #Verify if this is one static record
+        if ($DNSRecord.Timestamp -eq $null)
+        {
+          write "The record is already static no changes needed"
+        }
+        else  
+        {
+        $RecordIP = $DNSRecord.Recorddata.IPv4Address.IPAddressToString
+        $RecordName = $DNSRecord.HostName
+        write $RecordIP
+        write $RecordName
+        Add-DnsServerResourceRecordA -ZoneName $SelectedDNSZone -Name $RecordName -IPv4Address $RecordIP
+        write "The record for the name $DNSName is now static"
+        }
+      }
+   else 
+  {
+     write "this is not one A record or name does not exist"
+  }
