@@ -1,5 +1,5 @@
 # Description:
-# This script is intended to be runned on Server Windows Server 2016 and up ****Not Tested****
+
 # This is intended to be excuted on DNS servers locally, and only present information with the goal of filtering the results in Excel
 # No changes are intended to dns records with this script
 # Before running this script please take a DNS server backup, stay home be safe do backups
@@ -11,8 +11,9 @@
 # Output is  written to both console and csv file 
 # Filename is determined from the zonename you have selected
 # This script will export the selected Forward and Reverse DNS zones on the local server
+# This is sensitive to show errors when you have a subdomain zone with the same name of the root domain zone, for example contoso.com.contoso.com
 
-# change the location to the root of C drive to save the results on the same place everytime
+
 
 # Disclaimer
  cls 
@@ -41,13 +42,20 @@ $zoneRecords = @()
 # Select from the record infomration the name ip type and owner
 foreach ($record in $Results) {
 $strHostname = $record.HostName
+
+# If you have many errors because the records are returning like abc.contoso.com you can try to remove the comment it the next line. 
+# CAUSE: Most likely this is because you have one issue where this name is returning as abc.contoso.com.contoso.com the goal of this command is to trim that part
+# RESOLUTION
+#$strHostname = $strHostname.trimend($ZoneSelect)
+
+
 $strIp = $record.Recorddata.IPv4Address.IPAddressToString
 $getRecordType = $record.RecordType
 
-# You will only need to ensure that the part of the root CN=MicrosoftDNS,DC=DomainDnsZones,DC=itadmin,DC=com (My domain name is itadmins.com) is correct please do not change the parts with parametrized values
+# You will only need to ensure that the part of the root CN=MicrosoftDNS,DC=DomainDnsZones,DC=itadmin,DC=com is correct please do not change the parts with variable values this can also be CN=MicrosoftDNS,DC=ForestDnsZones,DC=itadmin,DC=com you can try connecting to this in you ADSI edit if you want to be sure of the values for your domain.
 # You can test the following two lines alone to be sure that they are reporting the expected information this is the most common part to have issues
         $getACL = get-acl -Path "ActiveDirectory:://RootDSE/DC=$strHostname,DC=$ZoneSelect,CN=MicrosoftDNS,DC=DomainDnsZones,DC=itadmin,DC=com" 
-        $getOwner = $ACL.Owner
+        $getOwner = $getACL.Owner
 
 # Check if the record is resolving to one IP address
 if ($strIp) {
