@@ -1,0 +1,34 @@
+function Get-StagingQuota ($Path){
+
+    <#
+    .SYNOPSIS
+        Calculate the Staging Quota for Windows DFSR of one folder.
+
+    .DESCRIPTION
+        This will query all the items in one folder, will sort them from the larger one to the smallest one. 
+        Then will select only the first 32 elements on the folder.
+        It will calculate the summatory of all the sizes and will divide it over 1gb, then store the result in one parameter
+        After this it will output the size in GB needed for staging quota in DFSR.
+
+    .PARAMETER Path
+        Please write the complete Path of the folder you need to calculate the staging quota for.
+        
+    .INPUTS
+        The path of the folder
+
+    .OUTPUTS
+        The staging quota in GB
+    
+    .EXAMPLE
+        Get-StagingQuota -path c:\temp
+
+    #>
+    
+    $First32LargestFiles = Get-ChildItem $Path -recurse | Sort-Object length -descending | select-object -first 32 | measure-object -property length –sum
+
+    $First32LargestFiles.sum/1gb
+    
+    }
+
+
+
