@@ -1,0 +1,23 @@
+The goal of the following function is because is see that a lot of people wonders how to control the infamous ping -t command on the internet using only powershell scripts
+It is not as useful as many alternatives out on the internet, the goal for me was to control one command that will run continously until stopped 
+Trying to answer this question without telling you to use test-netconnection as any reasonable guy will do, i am going to tackle the control of the ping -t command over powershell
+It took me a while to realize that we cannot send a Ctrl+break since the ping command will never be completed
+As well tried to use Start-sleep with no success maybe i just dont know how to use this
+Then tried to hit my brain with a mug of joe 
+Nothing seems to work as i want, why something so simple is so hard, i mean is only ping right?
+Until i learn that Jobs exist in powershell, yes i know my powershell level is still in 0
+Nevermind i am happy after writing this function my powershell level is still 0 nonetheless gained 1 EXP. IT IS A WIN FOR ME!!!!
+Still needs polishing like declaring a function and requesting the ip address and documenting the function properly even so that is something for the juan of tomorrow
+
+$IPv4 = "8.8.8.8"
+
+Start-Job -Name Script { ping -t $using:IPv4 | Foreach{"{0} - {1}" -f (Get-Date),$_} } 
+
+$Job = Get-Job -Name Script
+
+Read-Host -Prompt “Press enter to stop”
+
+Stop-Job -id $Job.Id
+
+Receive-Job -id $job.Id -wait -AutoRemoveJob > c:\ExtendedPing-$env:computername.txt
+
